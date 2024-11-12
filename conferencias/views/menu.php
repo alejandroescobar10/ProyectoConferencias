@@ -30,7 +30,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'administrador'
                 <a href="views/estudiantes.php" class="block bg-yellow-500 text-white p-4 rounded hover:bg-yellow-700">Gestionar Estudiantes</a>
             </li>
             <li>
-                <a href="views/conferencias.php" class="block bg-purple-500 text-white p-4 rounded hover:bg-purple-700">Gestionar Conferencias</a>
+                <a href="../../CrearConferencia/views/ConferencistaV.php" class="block bg-purple-500 text-white p-4 rounded hover:bg-purple-700">Gestionar Conferencias</a>
             </li>
         </ul>
     </nav>
