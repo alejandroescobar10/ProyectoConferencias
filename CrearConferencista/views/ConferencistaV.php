@@ -1,4 +1,12 @@
 <?php
+
+session_start();
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['user'])) {
+    header('Location: ../../../../login/views/login.php'); // Si no está autenticado, redirigir al login
+    exit;
+}
 require_once '../../conferencias/models/Database.php';
 
 ?>
@@ -21,16 +29,18 @@ require_once '../../conferencias/models/Database.php';
             <label for="codigo" class="block font-medium">Código:</label>
             <input type="text" id="codigo" class="w-full p-2 border border-gray-300 rounded">
             <button onclick="getConferencista()" class="bg-yellow-500 text-white px-4 py-2 rounded">Traer Datos</button>
-
         </div>
+
         <div class="mb-4">
             <label for="nombre" class="block font-medium">Nombre:</label>
             <input type="text" id="nombre" class="w-full p-2 border border-gray-300 rounded">
         </div>
+
         <div class="mb-4">
             <label for="apellido" class="block font-medium">Apellido:</label>
             <input type="text" id="apellido" class="w-full p-2 border border-gray-300 rounded">
         </div>
+
         <div class="mb-4">
             <label for="titulo_profesion" class="block font-medium">Título/Profesión:</label>
             <input type="text" id="titulo_profesion" class="w-full p-2 border border-gray-300 rounded">
@@ -40,33 +50,53 @@ require_once '../../conferencias/models/Database.php';
             <button onclick="addConferencista()" class="bg-blue-500 text-white px-4 py-2 rounded">Agregar Conferencista</button>
             <button onclick="updateConferencista()" class="bg-green-500 text-white px-4 py-2 rounded">Actualizar Conferencista</button>
             <button onclick="deleteConferencista()" class="bg-red-500 text-white px-4 py-2 rounded">Eliminar Conferencista</button>
-            <button onclick="listConferencistas()" class="bg-gray-500 text-white px-4 py-2 rounded">Listar Conferencistas</button>
         </div>
 
-        <div id="result" class="mt-4 bg-white p-4 rounded shadow"></div>
+        <div id="result" class="mt-4 bg-white p-4 rounded shadow">
+            <table id="conferencistas-table" class="min-w-full table-auto">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2 border-b">Código</th>
+                        <th class="px-4 py-2 border-b">Nombre</th>
+                        <th class="px-4 py-2 border-b">Apellido</th>
+                        <th class="px-4 py-2 border-b">Título/Profesión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los conferencistas se agregarán aquí automáticamente -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        function listConferencistas() {
-            fetch('api/conferencistas')
-                .then(response => response.json())
-                .then(data => {
-                    let html = '<ul class="space-y-2">';
-                    data.forEach(conf => {
-                        html += `
-                            <li class="p-2 border-b border-gray-200">
-                                <strong>Codigo:</strong> ${conf.codigo} <br>
-                                <strong>Nombre:</strong> ${conf.nombre} <br>
-                                <strong>Apellido:</strong> ${conf.apellido} <br>
-                                <strong>Título/Profesión:</strong> ${conf.titulo_profesion}
-                            </li>`;
-                    });
-                    html += '</ul>';
-                    document.getElementById('result').innerHTML = html;
-                })
-                .catch(error => console.error('Error al listar conferencistas:', error));
+        // Función para cargar todos los conferencistas al entrar a la vista
+        window.onload = function() {
+            loadConferencistas();
         }
 
+        // Función para listar todos los conferencistas desde la base de datos
+        function loadConferencistas() {
+            fetch('../api-conferencistas/get_all_conferencistas.php') // Asegúrate de tener la ruta correcta para tu API
+                .then(response => response.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach(conf => {
+                        console.log(conf);
+                        html += `
+                            <tr data-codigo="${conf.codigo}">
+                                <td class="px-4 py-2 border-b text-center">${conf.id}</td>
+                                <td class="px-4 py-2 border-b text-center">${conf.nombre}</td>
+                                <td class="px-4 py-2 border-b text-center">${conf.apellido}</td>
+                                <td class="px-4 py-2 border-b text-center">${conf.titulo_profesion}</td>
+                            </tr>`;
+                    });
+                    document.querySelector('#conferencistas-table tbody').innerHTML = html;
+                })
+                .catch(error => console.error('Error al cargar los conferencistas:', error));
+        }
+
+        // Función para traer los datos de un conferencista por su código
         function getConferencista() {
             const codigo = document.getElementById('codigo').value;
 
@@ -84,8 +114,7 @@ require_once '../../conferencias/models/Database.php';
                 .catch(error => console.error('Error al traer datos del conferencista:', error));
         }
 
-
-
+        // Función para agregar un nuevo conferencista
         function addConferencista() {
             const conferencista = {
                 codigo: document.getElementById('codigo').value,
@@ -104,11 +133,15 @@ require_once '../../conferencias/models/Database.php';
                 .then(response => response.json())
                 .then(result => {
                     alert(result.success ? "Conferencista agregado" : "Error al agregar conferencista");
-                    listConferencistas();
+                    if (result.success) {
+                        loadConferencistas(); // Recargar la lista de conferencistas
+                    }
+                    clearForm();
                 })
                 .catch(error => console.error('Error al agregar conferencista:', error));
         }
 
+        // Función para actualizar un conferencista
         function updateConferencista() {
             const conferencista = {
                 codigo: document.getElementById('codigo').value,
@@ -117,7 +150,7 @@ require_once '../../conferencias/models/Database.php';
                 titulo_profesion: document.getElementById('titulo_profesion').value
             };
 
-            fetch(`../api-conferencistas/update_conferencista.php/?codigo=${codigo}`, {
+            fetch('../api-conferencistas/update_conferencista.php', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -127,24 +160,38 @@ require_once '../../conferencias/models/Database.php';
                 .then(response => response.json())
                 .then(result => {
                     alert(result.success ? "Conferencista actualizado" : "Error al actualizar conferencista");
-                    listConferencistas();
+                    if (result.success) {
+                        loadConferencistas(); // Recargar la lista de conferencistas
+                    }
+                    clearForm();
                 })
                 .catch(error => console.error('Error al actualizar conferencista:', error));
         }
 
+        // Función para eliminar un conferencista
         function deleteConferencista() {
             const codigo = document.getElementById('codigo').value;
-            if (confirm("¿Estás seguro de que deseas eliminar este conferencista?")) {
-                fetch(`api/conferencistas/${codigo}`, {
-                        method: 'DELETE'
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        alert(result.success ? "Conferencista eliminado" : "Error al eliminar conferencista");
-                        listConferencistas();
-                    })
-                    .catch(error => console.error('Error al eliminar conferencista:', error));
-            }
+
+            fetch(`../api-conferencistas/delete_conferencista.php?codigo=${codigo}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    alert(result.success ? "Conferencista eliminado" : "Error al eliminar conferencista");
+                    if (result.success) {
+                        loadConferencistas(); // Recargar la lista de conferencistas
+                    }
+                    clearForm();
+                })
+                .catch(error => console.error('Error al eliminar conferencista:', error));
+        }
+
+        // Función para limpiar los campos del formulario
+        function clearForm() {
+            document.getElementById('codigo').value = '';
+            document.getElementById('nombre').value = '';
+            document.getElementById('apellido').value = '';
+            document.getElementById('titulo_profesion').value = '';
         }
     </script>
 

@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'administrador'
     <nav>
         <ul class="space-y-4">
             <li>
-                <a href="views/conferencistas.php" class="block bg-blue-500 text-white p-4 rounded hover:bg-blue-700">Gestionar Conferencistas</a>
+                <a href="../../CrearConferencista/views/ConferencistaV.php" class="block bg-blue-500 text-white p-4 rounded hover:bg-blue-700">Gestionar Conferencistas</a>
             </li>
             <li>
                 <a href="views/responsables.php" class="block bg-green-500 text-white p-4 rounded hover:bg-green-700">Gestionar Responsables</a>
