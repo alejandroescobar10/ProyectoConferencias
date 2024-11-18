@@ -2,7 +2,7 @@
 require_once 'controller/AuthController.php';
 
 // Crear conexión a la base de datos
-$db = new PDO('mysql:host=localhost;dbname=parcial3', 'alejandroEscobar', 'Edwardjunior10');
+$db = new PDO('mysql:host=localhost;port=3307;dbname=parcial_3', 'root', '');
 $authController = new AuthController($db);
 
 // Manejar las acciones

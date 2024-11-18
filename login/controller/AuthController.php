@@ -57,10 +57,10 @@ class AuthController
 
                 // Redirigir según el rol
                 if ($_SESSION['user_role'] === 'administrador') {
-                    header('Location: /parcial3/conferencias/views/menu.php'); // Ruta absoluta
+                    header('Location: /parcial3/ProyectoConferencias/conferencias/views/menu.php'); // Ruta absoluta
 
                 } else {
-                    header('Location: /parcial3/conferencias/views/conferences.php'); // Ruta absoluta para estudiante
+                    header('Location: /parcial3/ProyectoConferencias/estudiante/views/estudiante.php'); // Ruta absoluta para estudiante
                 }
                 exit();
             } else {
